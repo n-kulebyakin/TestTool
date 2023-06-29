@@ -1,0 +1,31 @@
+/*
+CustomSpinBox {
+    border: 1px solid rgb(176, 176, 176);
+    qproperty-alignment: AlignCenter;
+} 
+
+CustomSpinBox::up-button {
+    subcontrol-position: right;
+    width: 15px;
+    height: 24px;
+} 
+
+CustomSpinBox::up-arrow {
+    mage: url(right_arrow.png);
+    width: 10px;
+    height: 10px;
+}
+
+CustomSpinBox::down-button {
+    subcontrol-position: left;
+    width: 15px;
+    height: 24px;
+}
+
+CustomSpinBox::down-arrow {
+    image: url(left_arrow.png);
+    width: 10px;
+    height: 10px;
+}
+
+*/
