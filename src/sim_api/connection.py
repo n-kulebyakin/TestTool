@@ -21,24 +21,24 @@ class SimSocket(QTcpSocket):
         self.disconnectFromHost()
 
     def send(self, data):
-        self.write(bytes(data, 'utf-8'))
+        self.write(bytes(data, "utf-8"))
 
     def on_error(self):
-        print('Error connection:', self.errorString())
+        print("Error connection:", self.errorString())
         self.close()
 
     def on_connected(self):
-        print('Connected to HOST')
+        print("Connected to HOST")
         if self.state_button:
-            self.state_button.setText('Disconnect')
+            self.state_button.setText("Disconnect")
 
     def on_disconnect(self):
-        print('Disconnected')
+        print("Disconnected")
         if self.state_button:
-            self.state_button.setText('Connect')
+            self.state_button.setText("Connect")
 
     def on_ready_read(self):
-        data = ''
+        data = ""
         while self.bytesAvailable():
             data += str(self.readAll())[2:-1]
         self.output(data)

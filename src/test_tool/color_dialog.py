@@ -15,14 +15,13 @@ OBJECT_COLORS = {"SHSIGNAL": "#aa8c77",
 
 
 class ObjectColorWindow(QDialog):
-
     objects_colors = None
     objects = None
 
     def __init__(self, colors, visual_objects):
         super().__init__()
-        self.accept_button = QPushButton('Accept')
-        self.cancel_button = QPushButton('Cancel')
+        self.accept_button = QPushButton("Accept")
+        self.cancel_button = QPushButton("Cancel")
         self.v_layout = QVBoxLayout()
         self.color_table = QTableWidget()
 
@@ -31,7 +30,7 @@ class ObjectColorWindow(QDialog):
 
         self.color_table.setEditTriggers(self.color_table.NoEditTriggers)
         self.color_table.setColumnCount(2)
-        self.color_table.setHorizontalHeaderLabels(['Type', 'Value'])
+        self.color_table.setHorizontalHeaderLabels(["Type", "Value"])
         self.objects_colors = colors
         self.objects = visual_objects
         self.color_table.setRowCount(len(colors))
@@ -44,11 +43,11 @@ class ObjectColorWindow(QDialog):
         self.changed_item = []
         self.accept_button.clicked.connect(self.accept_changes)
 
-        all_types = [self.objects[x].object_data['Type'] for x in self.objects]
+        all_types = [self.objects[x].object_data["Type"] for x in self.objects]
 
         for key in all_types:
             if key not in self.objects_colors:
-                self.objects_colors[key] = '#c6cdda'
+                self.objects_colors[key] = "#c6cdda"
         for n, key in enumerate(self.objects_colors):
             object_type = QTableWidgetItem(key)
             self.color_table.setItem(n, 0, object_type)
@@ -73,7 +72,7 @@ class ObjectColorWindow(QDialog):
         for row in self.changed_item:
             logical_type = self.color_table.item(row, 0).text()
             for obj in self.objects:
-                obj_type = self.objects[obj].object_data['Type']
+                obj_type = self.objects[obj].object_data["Type"]
                 if obj_type == logical_type:
                     self.objects[obj].accept_new_colors(self.objects_colors)
         self.close()

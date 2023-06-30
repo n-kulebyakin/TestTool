@@ -200,7 +200,7 @@ def command_table_parser(command_table):
 # =========================================
 
 def add_current_object(parsed_data, current_object, line):
-    if 'Name' not in current_object:
+    if "Name" not in current_object:
         return
     parsed_data["Logical_objects"][current_object["Name"]] = deepcopy(current_object)
 
@@ -263,7 +263,7 @@ def attributes_parser(line, key, parsed_data, temp_object):
                 key[0] = "Leg:"
             return
 
-    elif key[0] == "Leg:" and line[0]!="Leg:" or key[0] == "External":
+    elif key[0] == "Leg:" and line[0] != "Leg:" or key[0] == "External":
         temp_object["legs"][line[0]] = {
             "neighbour": line[1],
             "neigbourLeg": line[2],
@@ -309,7 +309,7 @@ def interlocking_data_parser(interlocking_data):
         "Seq": [],
     }
     current_object = {}
-    key = ["Name",]
+    key = ["Name", ]
     for line in interlocking_data:
         line_counter += 1
         line = line_replacer(line)
@@ -326,7 +326,7 @@ def interlocking_data_parser(interlocking_data):
                 parsed_data["Site Version"].append(line[-1].lstrip())
             else:
                 parsed_data[line[0].lstrip()] = (
-                    line[1].lstrip().replace('"', "")
+                    line[1].lstrip().replace(""", "")
                 )
             continue
         if key[0] not in ("Name", "COS", "IPU") and not line.count("Leg:"):

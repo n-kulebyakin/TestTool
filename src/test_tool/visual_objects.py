@@ -25,7 +25,6 @@ from PyQt5.Qt import QEvent
 from PyQt5.Qt import QGraphicsTextItem
 from PyQt5.Qt import QGraphicsView
 
-
 from .designation import paint_graphic
 
 PASSIVE_COLOR = QColor(155, 155, 155)
@@ -34,14 +33,6 @@ EMERGENCY_COLOR = QColor(255, 0, 0)
 
 
 class MiniRect(QGraphicsWidget):
-    '''
-    color = passive_color = PASSIVE_COLOR
-    active_color = ACTIVE_COLOR
-    emergency_color = EMERGENCY_COLOR
-    emergency = False
-    selected = False
-    border = 0
-    '''
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -76,12 +67,6 @@ class MiniRect(QGraphicsWidget):
 
 
 class LogicalConnector(QGraphicsWidget):
-    """    color = QColor(175, 0, 255)
-    pen = QPen(QColor("black"))
-    pen.setWidth(1)
-    length = 0
-    selected = False
-    rect_pen = QPen(QBrush(), 1, Qt.DashLine)"""
 
     def __init__(self, leg_1, leg_2):
         super().__init__()
@@ -218,7 +203,6 @@ class ObjectView(MiniRect):
         self.object_legs = []
         self.legs_text = []
 
-
         self.active_color = QColor(255, 50, 50)
         self.obj_type = obj_type
         self.setFocusPolicy(Qt.StrongFocus)
@@ -238,10 +222,10 @@ class ObjectView(MiniRect):
             self.object_legs.append(new_leg)
             self.legs_text.append(new_text)
 
-        actions = (('Rotate left', self.custom_rotation_left),
-                   ('Rotate right', self.custom_rotation_right),
-                   ('Flip X', self.flip_x),
-                   ('Flip Y', self.flip_y),
+        actions = (("Rotate left", self.custom_rotation_left),
+                   ("Rotate right", self.custom_rotation_right),
+                   ("Flip X", self.flip_x),
+                   ("Flip Y", self.flip_y),
                    )
 
         for action_name, func in actions:
@@ -333,18 +317,19 @@ class ObjectView(MiniRect):
             for leg in self.object_legs:
                 if leg.connector:
                     leg.connector.specialTransform()
-        '''
+        """
         designation.paint_graphic(self.obj_type,
                                   painter,
                                   self.size().height(),
                                   self.size().width(),
                                   self.border)
-        '''
+        """
         paint_graphic(self.obj_type,
-                                  painter,
-                                  self.size().height(),
-                                  self.size().width(),
-                                  self.border)
+                      painter,
+                      self.size().height(),
+                      self.size().width(),
+                      self.border)
+
     def updateLegTextPos(self):
         for text in self.legs_text:
             leg_obj = self.object_legs[self.legs_text.index(text)]
@@ -369,7 +354,7 @@ class ObjectLabel(QGraphicsTextItem):
         super().__init__()
         self.setPos(x, y)
         self.setPlainText(text)
-        self.setFont(QFont('Times new roman', 10, QFont.Bold))
+        self.setFont(QFont("Times new roman", 10, QFont.Bold))
         self.old_pos = None
 
     def mousePressEvent(self, event):
@@ -396,13 +381,13 @@ class LogicalObject(QGraphicsWidget):
         # -------------------------------------------------------
         self.name = name
         self.object_data = object_data
-        self.colors = colors.get(object_data['Type'])
+        self.colors = colors.get(object_data["Type"])
         # ------------------------------------------------------
         self.scene = scene
 
         self.object_view = ObjectView(colors, name,
-                                      scene, object_data['legs'],
-                                      object_data['Type'],
+                                      scene, object_data["legs"],
+                                      object_data["Type"],
                                       project_tree)
         self.object_view.setObjectName(name)
         self.obj_label = ObjectLabel(name,
@@ -442,45 +427,45 @@ class LogicalObject(QGraphicsWidget):
     def updateColor(self):
         if self.selected:
             return
-        indication = self.object_data['indication']
-        obj_type = self.object_data['Type']
-        if obj_type == 'POINT':
-            if 'S_VZ' in indication and indication['S_VZ']['value'] == '0':
+        indication = self.object_data["indication"]
+        obj_type = self.object_data["Type"]
+        if obj_type == "POINT":
+            if "S_VZ" in indication and indication["S_VZ"]["value"] == "0":
                 self.object_view.color = QColor(0, 6, 253)
                 self.object_view.passive_color = self.object_view.color
-            elif 'S_ZVZ' in indication and indication['S_ZVZ']['value'] == '0':
+            elif "S_ZVZ" in indication and indication["S_ZVZ"]["value"] == "0":
                 self.object_view.color = QColor(0, 6, 253)
                 self.object_view.passive_color = QColor(0, 6, 253)
-            elif 'S_POS' in indication and indication['S_POS']['value'] == '0':
+            elif "S_POS" in indication and indication["S_POS"]["value"] == "0":
                 self.object_view.color = QColor(245, 96, 253)
                 self.object_view.passive_color = QColor(245, 96, 253)
-            elif 'S_POS' in indication and indication['S_POS']['value'] == '1':
+            elif "S_POS" in indication and indication["S_POS"]["value"] == "1":
                 self.object_view.color = QColor(82, 138, 194)
                 self.object_view.passive_color = QColor(82, 138, 194)
-            elif 'S_POS' in indication and indication['S_POS']['value'] == '2':
+            elif "S_POS" in indication and indication["S_POS"]["value"] == "2":
                 self.object_view.color = QColor(32, 164, 68)
                 self.object_view.passive_color = QColor(32, 164, 68)
-            elif 'S_POS' in indication and indication['S_POS']['value'] == '3':
+            elif "S_POS" in indication and indication["S_POS"]["value"] == "3":
                 self.object_view.color = QColor(237, 237, 39)
                 self.object_view.passive_color = QColor(237, 237, 39)
             else:
                 self.object_view.color = QColor(self.colors)
                 self.object_view.passive_color = QColor(self.colors)
-        elif obj_type == 'SECTION':
-            if 'S_TC' in indication and indication['S_TC']['value'] == '0':
+        elif obj_type == "SECTION":
+            if "S_TC" in indication and indication["S_TC"]["value"] == "0":
                 self.object_view.color = QColor(245, 96, 253)
                 self.object_view.passive_color = QColor(245, 96, 253)
-            elif 'S_TC' in indication and indication['S_TC']['value'] == '1':
+            elif "S_TC" in indication and indication["S_TC"]["value"] == "1":
                 self.object_view.color = QColor(82, 138, 194)
                 self.object_view.passive_color = QColor(82, 138, 194)
             else:
                 self.object_view.color = QColor(self.colors)
                 self.object_view.passive_color = QColor(self.colors)
 
-        elif obj_type in ('SIGNAL', 'SHSIGNAL'):
-            if 'S_SIG' in indication and indication['S_SIG']['value'] == '0':
+        elif obj_type in ("SIGNAL", "SHSIGNAL"):
+            if "S_SIG" in indication and indication["S_SIG"]["value"] == "0":
                 self.object_view.color = self.object_view.passive_color = QColor(245, 96, 253)
-            elif 'S_SIG' in indication and indication['S_SIG']['value'] not in ('1', ''):
+            elif "S_SIG" in indication and indication["S_SIG"]["value"] not in ("1", ""):
                 self.object_view.color = self.object_view.passive_color = QColor(113, 255, 131)
             else:
                 self.object_view.color = QColor(self.colors)
@@ -488,7 +473,7 @@ class LogicalObject(QGraphicsWidget):
         self.object_view.update()
 
     def accept_new_colors(self, colors):
-        self.colors = colors[self.object_data['Type']]
+        self.colors = colors[self.object_data["Type"]]
         self.object_view.color = QColor(self.colors)
         self.object_view.passive_color = QColor(self.colors)
         self.updateColor()
