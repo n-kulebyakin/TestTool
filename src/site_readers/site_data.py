@@ -326,7 +326,7 @@ def interlocking_data_parser(interlocking_data):
                 parsed_data["Site Version"].append(line[-1].lstrip())
             else:
                 parsed_data[line[0].lstrip()] = (
-                    line[1].lstrip().replace(""", "")
+                    line[1].lstrip().replace("\"", "")
                 )
             continue
         if key[0] not in ("Name", "COS", "IPU") and not line.count("Leg:"):
