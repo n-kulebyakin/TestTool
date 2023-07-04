@@ -57,8 +57,11 @@ from site_readers.configuration import get_file_with_key
 
 from site_readers.scene import read_scene_data
 
-from site_readers.site_data import command_table_parser
-from site_readers.site_data import interlocking_data_parser
+
+from site_readers.data_reader import interlocking_data_parser
+from site_readers.command_reader import command_data_parser
+
+
 
 from sim_api.sim_data_parser import log_file_parser
 from sim_api.sim_data_parser import object_variable_parser
@@ -444,7 +447,7 @@ class MainWindow(QMainWindow):
 
         if os.path.exists(comm_table_path):
             command_table_file = open(comm_table_path)
-            self.site_command_table = command_table_parser(command_table_file)
+            self.site_command_table = command_data_parser(command_table_file)
             self.site_components = self.site_command_table["Components"]
             command_table_file.close()
         else:
@@ -536,22 +539,22 @@ class MainWindow(QMainWindow):
 
             for current_leg in legs:
                 if not current_leg.connector:
-                    neigbour_leg = self.get_neighbour_leg(name,
+                    neighbour_leg = self.get_neighbour_leg(name,
                                                           current_leg.leg)
-                    new_connector = LogicalConnector(current_leg, neigbour_leg)
+                    new_connector = LogicalConnector(current_leg, neighbour_leg)
                     self.scen.addItem(new_connector)
 
     def get_neighbour_leg(self, log_name, from_leg):
         legs = self.logical_objects_site[log_name]["legs"][from_leg]
         n_name = legs["neighbour"]
-        n_leg = int(legs["neigbourLeg"])
+        n_leg = int(legs["neighbour_leg"])
         leg = self.visual_objects[n_name].object_view.object_legs[n_leg]
         return leg
 
     def import_com_data(self, comm_table_path):
         if os.path.exists(comm_table_path):
             com_data_file = open(comm_table_path)
-            self.com_data = command_table_parser(com_data_file)
+            self.com_data = command_data_parser(com_data_file)
             self.components_site = self.com_data["Components"]
             com_data_file.close()
             return True
