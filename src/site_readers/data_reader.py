@@ -303,11 +303,3 @@ def interlocking_data_parser(interlocking_data):
             # обработка файла останавливается
             break
     return out_data
-
-
-if __name__ == "__main__":
-    int_data_path = 'X:/projects/mosgd/MMK/serebryanyi_bor/eqv/ipu7/ILS2_RF_SBO-RB2CUR/ILS2_RF_SBO/implementation/input/data/Interlocking_data'
-    with open(int_data_path) as int_data:
-        parsed_data = interlocking_data_parser(int_data)
-        print(parsed_data['Header'])
-        print(parsed_data['Logical_objects'])

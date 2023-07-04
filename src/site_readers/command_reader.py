@@ -178,12 +178,3 @@ def command_data_parser(command_data):
             break
 
     return out_data
-
-
-if __name__ == "__main__":
-    command_data_path = 'X:/projects/mosgd/MCD/mcd_3/moskva_kazanskaya/eqv/ipu2/ILS2_MCD3_KAZANSKY2-ELCUR/ILS2_MCD3_KAZANSKY2/implementation/input/data/Command_table'
-    with open(command_data_path) as int_data:
-        parsed_data = command_data_parser(int_data)
-        for component in parsed_data['Components']['UPM']['SIC']:
-            print(component)
-        # print(parsed_data['Components']['UPM']['SIC'])
