@@ -58,7 +58,7 @@ from site_readers.configuration_reader import config_reader
 # from site_readers.configuration import get_file_with_key
 from site_readers.configuration_reader import get_path_to_key
 
-from site_readers.scene import read_scene_data
+from site_readers.scene_reader import read_scene_data
 
 from site_readers.data_reader import interlocking_data_parser
 from site_readers.command_reader import command_data_parser
