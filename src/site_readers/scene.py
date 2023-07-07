@@ -10,18 +10,19 @@ def get_x_y_data(node_data):
     return int(node_data)
 
 
-def read_scene_data(file):
+def read_scene_data(file_path):
     max_x = 1000
     max_y = 1000
 
     logical_objects = {}
     rem_2 = None
 
-    doc = xml.dom.minidom.parse(file)
+    doc = xml.dom.minidom.parse(file_path)
     node = doc.documentElement
 
     rem_1 = node.getElementsByTagName("ScriptGraphicObject")
-    if file[-14:] == "LogicScene.xml":
+
+    if file_path.endswith('LogicScene.xml'):
         rem_2 = node.getElementsByTagName("config")
 
     for node in rem_1:

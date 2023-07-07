@@ -8,12 +8,12 @@ from copy import deepcopy
 WORD_PATTERN = r'(?:[\w.-]|".*")+'
 
 
-def get_line_data(line):
+def get_line_data(line, pattern=WORD_PATTERN):
     """
     Строка разбивается на слова в соответствии с шаблоном
     и исключаются закомментированные строки
     """
-    match = re.findall(WORD_PATTERN, line)
+    match = re.findall(pattern, line)
     if match and "." != match[0][0]:
         return match
 
@@ -50,18 +50,22 @@ def ofw_analyse(line, current_obj):
         current_obj["ofw"][line[0]] = {"ipu": line[1:], "value": ""}
 
 
+def order_status_analyse(line, current_section):
+    current_section[line[0]] = {"ipu": line[1], "value": ""}
+
+
 def order_analyse(line, current_obj):
     """
     Информация передаваемая на контроллеры
     """
-    current_obj["orders"][line[0]] = {"ipu": line[1], "value": ""}
+    order_status_analyse(line, current_obj["orders"])
 
 
 def status_analyse(line, current_obj):
     """
     Информация получаемая от контроллеров
     """
-    current_obj["status"][line[0]] = {"ipu": line[1], "value": ""}
+    order_status_analyse(line, current_obj["status"])
 
 
 def indication_analyse(line, current_obj):
@@ -135,7 +139,7 @@ def log_objects_analyse(interlocking_data, out_data):
 
     current_object = deepcopy(current_object_temp)
     current_sub_section = None
-    for line_num, line in enumerate(interlocking_data):
+    for line in interlocking_data:
         line = get_line_data(line)
 
         if line:
@@ -272,7 +276,7 @@ def interlocking_data_parser(interlocking_data):
         'COS_objects': {},
         'Site_product_name': '',
     }
-    for line_num, line in enumerate(interlocking_data):
+    for line in interlocking_data:
 
         line = get_line_data(line)
 

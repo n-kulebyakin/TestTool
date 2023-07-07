@@ -150,7 +150,7 @@ def command_data_parser(command_data):
         'Site_product_name': '',
     }
 
-    for line_num, line in enumerate(command_data):
+    for line in command_data:
         line = get_line_data(line)
 
         if not line:
