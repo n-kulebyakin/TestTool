@@ -124,8 +124,10 @@ def components_analyse(command_data, out_data):
                 current_component['Shared'] = line[-1]
                 current_sub_section = 'Pretest'
             elif current_sub_section == 'Pretest':
+                # Если раздел претеста сохраняем его отдельно
                 current_component['Pretest'] = deepcopy(line)
             else:
+                # Всё остальное является телом команды
                 current_component['Manoeuvres'].append(deepcopy(line))
 
 

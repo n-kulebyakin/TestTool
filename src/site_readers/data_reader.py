@@ -124,9 +124,10 @@ def log_objects_analyse(interlocking_data, out_data):
 
     # Функции анализа атрибутов объекта
     # собраны для удобства вызова
+    # в пары ключевое слово:функция
     analyse_func = {
         'Leg': leg_analyse,
-        'Individ': individ_analyse,
+        'Individualizations': individ_analyse,
         'Ofw': ofw_analyse,
         'Order': order_analyse,
         'Status': status_analyse,
@@ -159,27 +160,17 @@ def log_objects_analyse(interlocking_data, out_data):
                 continue
 
             # Выбор подраздела объекта по заголовку
-            if line[0] == 'Leg':
-                current_sub_section = 'Leg'
-            elif line[0] == 'Individualizations':
-                current_sub_section = 'Individ'
-            elif line[0] == 'Order':
+            if line[0] == 'Order':
                 # Заголовки одинаковые, но информация различается
                 # для передачи в контроллеры и в другие объекты
                 if current_sub_section != 'Ofw':
                     current_sub_section = 'Ofw'
                 else:
                     current_sub_section = 'Order'
-            elif line[0] == 'Status':
-                current_sub_section = 'Status'
-            elif line[0] == 'Indication':
-                current_sub_section = 'Indication'
-            elif line[0] == 'Command':
-                current_sub_section = 'Command'
-            elif line[0] == 'Telegram':
-                current_sub_section = 'Telegram'
-            elif line[0] == 'Check':
-                current_sub_section = 'Check'
+            elif line[0] in analyse_func:
+                # Если строка начинается с ключевого слова
+                # то изменяем текущую подсекцию
+                current_sub_section = line[0]
             else:
                 # Обработка строки в соответствии с текущей подсекцией
                 current_func = analyse_func[current_sub_section]

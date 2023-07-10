@@ -142,7 +142,7 @@ def path_analyse(last_line, config_data, file_path):
             product_save(current_data, out_data, current_path)
             return out_data
         if line[0] == 'Path':
-            # Если строка явялется началом нового раздела PATH,
+            # Если строка является началом нового раздела PATH,
             # то сохраняем текущий продукт, получаем новый
             # абсолютный путь и очищаем текущий продукты
             product_save(current_data, out_data, current_path)
@@ -275,10 +275,3 @@ def get_path_to_key(config_information, key):
     if key_data:
         path_to_key = os.path.join(key_data['Path'], key_data['Name'])
         return path_to_key
-
-
-if __name__ == '__main__':
-    config_data = config_reader(
-        'X:/eqv/adapt/ILL2_MCD4_APRELEVKA/ILL2_MCD4_APRELEVKA-E84CUR/ILL2_MCD4_APRELEVKA/ConfigInfo.CI',
-        adapt_path=ADAPT_PATH)
-    print(get_path_to_key(config_data, 'ILL_STERNOL_FILE'))
