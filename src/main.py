@@ -4,6 +4,7 @@ import os
 import datetime
 import logging
 
+from pathlib import Path
 from statistics import mean
 
 from PyQt5.QtWidgets import QMainWindow
@@ -52,13 +53,15 @@ from test_tool.visual_objects import CustomGraphicsView
 from test_tool.visual_objects import LogicalObject
 from test_tool.visual_objects import LogicalConnector
 
-from site_readers.configuration import read_config_info
-from site_readers.configuration import get_file_with_key
+# from site_readers.configuration import config_reader
+from site_readers.configuration_reader import config_reader
+# from site_readers.configuration import get_file_with_key
+from site_readers.configuration_reader import get_path_to_key
 
-from site_readers.scene import read_scene_data
+from site_readers.scene_reader import read_scene_data
 
-from site_readers.site_data import command_table_parser
-from site_readers.site_data import interlocking_data_parser
+from site_readers.data_reader import interlocking_data_parser
+from site_readers.command_reader import command_data_parser
 
 from sim_api.sim_data_parser import log_file_parser
 from sim_api.sim_data_parser import object_variable_parser
@@ -68,7 +71,7 @@ from site_tests.read_test_case import read_test_file
 from test_tool.color_dialog import ObjectColorWindow, OBJECT_COLORS
 
 from site_tests import test_writer as tw
-from site_readers import logic
+from site_readers import logic_reader
 
 from sim_api.connection import SimSocket, send_to_sim
 from sim_api.actions import SIM_ACTIONS
@@ -121,7 +124,6 @@ class MainWindow(QMainWindow):
         self.sim_timer.timeout.connect(self.send_sim)
         self.show()
         self.set_custom_styles(CSS_FILE)
-
 
     def set_custom_styles(self, css_file):
         if os.path.exists(css_file):
@@ -413,19 +415,18 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.view)
 
     def open_site_data(self, config_path=ils_path):
-        ils_path = config_path[0:config_path.rfind("/") + 1]
+        ils_path = str(Path(config_path).parent.absolute())
+        # ils_path = config_path[0:config_path.rfind("/") + 1]
         if not os.path.exists(config_path):
             return
         self.clear_logical_site()
-        self.config_info = read_config_info(config_path)
+        self.config_info = config_reader(config_path)
 
-        rcad_scene = ils_path + "LogicScene.xml"
-        yard_scene = ils_path + "yard.xml"
+        rcad_scene = os.path.join(ils_path, "LogicScene.xml")
+        yard_scene = os.path.join(ils_path, "yard.xml")
 
         for key in ("CommandTable", "IntData", "ILL_STERNOL_FILE"):
-            file_name = get_file_with_key(self.config_info, key)
-            self.site_keys[key] = (self.config_info[file_name]["Path"] +
-                                   "/" + file_name)
+            self.site_keys[key] = get_path_to_key(self.config_info, key)
 
         if os.path.exists(rcad_scene):
             self.rcad_data = read_scene_data(rcad_scene)
@@ -444,7 +445,7 @@ class MainWindow(QMainWindow):
 
         if os.path.exists(comm_table_path):
             command_table_file = open(comm_table_path)
-            self.site_command_table = command_table_parser(command_table_file)
+            self.site_command_table = command_data_parser(command_table_file)
             self.site_components = self.site_command_table["Components"]
             command_table_file.close()
         else:
@@ -536,22 +537,22 @@ class MainWindow(QMainWindow):
 
             for current_leg in legs:
                 if not current_leg.connector:
-                    neigbour_leg = self.get_neighbour_leg(name,
-                                                          current_leg.leg)
-                    new_connector = LogicalConnector(current_leg, neigbour_leg)
+                    neighbour_leg = self.get_neighbour_leg(name,
+                                                           current_leg.leg)
+                    new_connector = LogicalConnector(current_leg, neighbour_leg)
                     self.scen.addItem(new_connector)
 
     def get_neighbour_leg(self, log_name, from_leg):
         legs = self.logical_objects_site[log_name]["legs"][from_leg]
         n_name = legs["neighbour"]
-        n_leg = int(legs["neigbourLeg"])
+        n_leg = int(legs["neighbour_leg"])
         leg = self.visual_objects[n_name].object_view.object_legs[n_leg]
         return leg
 
     def import_com_data(self, comm_table_path):
         if os.path.exists(comm_table_path):
             com_data_file = open(comm_table_path)
-            self.com_data = command_table_parser(com_data_file)
+            self.com_data = command_data_parser(com_data_file)
             self.components_site = self.com_data["Components"]
             com_data_file.close()
             return True
@@ -579,8 +580,10 @@ class MainWindow(QMainWindow):
         if "#INOUT" not in self.logic_data[obj_type]:
             return
         for key in self.logic_data[obj_type]["#INOUT"]:
-            in_channel = self.logic_data[obj_type]["#INOUT"][key]["init"]
-            out_channel = self.logic_data[obj_type]["#INOUT"][key]["init"]
+            t = self.logic_data[obj_type]["#INOUT"][key]
+            print(self.logic_data[obj_type]["#INOUT"][key])
+            in_channel = self.logic_data[obj_type]["#INOUT"][key]['0']["init"]
+            out_channel = self.logic_data[obj_type]["#INOUT"][key]['0']["init"]
             in_out_data = {"IN": in_channel, "OUT": out_channel}
             if "channels" not in self.logical_objects_site[obj]:
                 self.logical_objects_site[obj]["channels"] = {key: in_out_data}
@@ -588,14 +591,14 @@ class MainWindow(QMainWindow):
                 self.logical_objects_site[obj]["channels"][key] = in_out_data
 
     def add_ibit_from_logic(self, obj, obj_type):
-        all_i_bit = logic.get_ibit_list(obj_type, self.logic_data)
+        all_i_bit = logic_reader.get_ibits_list(obj_type, self.logic_data)
         obj_i_bit = self.logical_objects_site[obj]["individualizations"]
         new_i_bit = [x for x in all_i_bit if x not in obj_i_bit]
 
         for i_bit in new_i_bit:
-            default_val = logic.get_default_value(i_bit,
-                                                  obj_type,
-                                                  self.logic_data)
+            default_val = logic_reader.get_default_value(i_bit,
+                                                         obj_type,
+                                                         self.logic_data)
 
             obj_i_bit[i_bit] = default_val
 
@@ -603,7 +606,7 @@ class MainWindow(QMainWindow):
         if "#OUT" not in self.logic_data[obj_type]:
             return
 
-        ste_orders = logic.get_orders(obj_type, self.logic_data)
+        ste_orders = logic_reader.get_orders(obj_type, self.logic_data)
 
         if not ste_orders:
             return
@@ -618,7 +621,7 @@ class MainWindow(QMainWindow):
             for order in ste_orders:
                 obj_orders[order] = {"ipu": "", "value": ""}
             self.logical_objects_site[obj]["orders"] = obj_orders
-        logic_ofw = logic.get_ofw(obj_type, self.logic_data)
+        logic_ofw = logic_reader.get_ofw(obj_type, self.logic_data)
         obj_ofw = self.logical_objects_site[obj]["ofw"]
         if logic_ofw:
             new_ofw = [x for x in logic_ofw if x not in obj_ofw]
@@ -632,13 +635,13 @@ class MainWindow(QMainWindow):
             cos = self.logical_objects_site[obj]["indication"][indication]
             obj_indication[indication] = {"cos": cos, "value": ""}
 
-        logic_ind = logic.getStatus(obj_type, self.logic_data)
+        logic_ind = logic_reader.get_status(obj_type, self.logic_data)
         for indication in logic_ind:
             if indication not in obj_indication:
                 obj_indication[indication] = {"cos": "", "value": ""}
 
     def add_status_from_logic(self, obj, obj_type):
-        sternol_status = logic.get_checks(obj_type, self.logic_data)
+        sternol_status = logic_reader.get_checks(obj_type, self.logic_data)
         obj_status = self.logical_objects_site[obj]["status"]
         new_status = [x for x in sternol_status if x not in obj_status]
         for status in new_status:
@@ -646,6 +649,7 @@ class MainWindow(QMainWindow):
         for status in obj_status:
             if status.count("."):
                 continue
+
             init = self.logic_data[obj_type]["#IN"][status]["init"]
             if status in self.logic_data[obj_type]["#IN"]:
                 obj_status[status]["value"] = init
@@ -657,7 +661,7 @@ class MainWindow(QMainWindow):
         if not os.path.exists(ste_path):
             logging.error("NO FOUND ILL FILE")
             return
-        self.logic_data = logic.read_logic(ste_path)
+        self.logic_data = logic_reader.read_logic(ste_path)
         new_object_types = [x for x in self.logic_data
                             if x[0] != "#" and x not in self.objects_colors]
         for object_type in new_object_types:
