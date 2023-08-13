@@ -8,11 +8,12 @@ from PyQt5.QtGui import QTransform
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QSplashScreen
 
-from visual_classes.color_dialog import OBJECT_COLORS, ObjectColorWindow
-from visual_classes.scene_objects import LogicalConnector
-from visual_classes.scene_objects import LogicalObject
-from visual_classes.window_objects import ImportSiteDataMixin
-from visual_classes.window_objects import MainWindow
+from modeling_classes.window import SimWindow
+from site_classes.color_dialog import OBJECT_COLORS, ObjectColorWindow
+from site_classes.scene_objects import LogicalConnector
+from site_classes.scene_objects import LogicalObject
+from site_classes.window_objects import ImportSiteDataMixin
+from site_classes.window_objects import MainWindow
 
 
 class SiteWindow(ImportSiteDataMixin, MainWindow):
@@ -42,10 +43,10 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
                                      -self._coordinates["sceneHeight"],
                                      self._coordinates["sceneWidth"] + 1000,
                                      self._coordinates["sceneHeight"])
-        for z_level, name in enumerate(self._logical_objects):
+        for deep, name in enumerate(self._logical_objects):
             log_data = self._logical_objects[name]
 
-            new_obj = LogicalObject(name, log_data, z_level, self.view.scene,
+            new_obj = LogicalObject(name, log_data, deep, self.view.scene,
                                     self.objects_colors,
                                     self.project_explorer.project_tree)
 
@@ -134,10 +135,12 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
         return leg
 
     def open_site_data(self, config_path):
+
         if not os.path.exists(config_path):
             return
         imported = self.import_site_data(config_path)
         if imported:
+
             self._selected_obj = None
             for obj in list(self._visual_objects):
                 self._visual_objects[obj].deleteLater()
@@ -274,13 +277,19 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
         self._color_window.show()
 
 
+class ToolWindow(SimWindow, SiteWindow):
+    def __init__(self):
+        super().__init__()
+        self.property_explorer.tool_box.addItem(self.simulation, "Simulation")
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     splash = QSplashScreen()
     splash.setPixmap(QPixmap("static/start_screen.gif"))
     splash.show()
 
-    main_form = SiteWindow()
+    main_form = ToolWindow()
     main_form.show()
 
     splash.finish(main_form)

@@ -6,13 +6,16 @@ from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5.QtWidgets import QVBoxLayout
 
-OBJECT_COLORS = {"SHSIGNAL": "#aa8c77",
-                 "SECTION": "#d3c9c2",
-                 "POINT": "#b0a6ab",
-                 "ABTCE": "#d3c9c2",
-                 "LINEBLOCK": "#524636",
-                 "INTERFACE": "#c6cdda",
-                 }
+# @formatter:off
+OBJECT_COLORS = {
+    "SHSIGNAL": "#aa8c77",
+    "SECTION": "#d3c9c2",
+    "POINT": "#b0a6ab",
+    "ABTCE": "#d3c9c2",
+    "LINEBLOCK": "#524636",
+    "INTERFACE": "#c6cdda",
+}
+# @formatter:on
 
 
 class ObjectColorWindow(QDialog):

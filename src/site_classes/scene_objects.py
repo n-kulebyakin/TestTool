@@ -15,8 +15,9 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QPainter
 from PyQt5.QtGui import QPen
 from PyQt5.QtGui import QTransform
+from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QGraphicsWidget
-from PyQt5.QtWidgets import QSpinBox
+from PyQt5.QtWidgets import QMenu
 
 from .signs import paint_graphic
 
@@ -115,8 +116,8 @@ class LogicalConnector(QGraphicsWidget):
         new_start_point = QPointF(pos_1.x(), pos_1.y())
         new_end_point = QPointF(pos_2.x(), pos_2.y())
         if (
-            new_start_point != self._start_point
-            or new_end_point != self._end_point
+                new_start_point != self._start_point
+                or new_end_point != self._end_point
         ):
             self._start_point = new_start_point
             self._end_point = new_end_point
@@ -188,10 +189,10 @@ class LogicalLeg(Rectangle):
         # TODO: Пересмотреть алгоритм поиска
         if legs > 4:
             if (
-                leg <= 3
-                and legs % 4 < (leg + 1)
-                or leg > 3
-                and legs % 4 < (leg + 1) % 4
+                    leg <= 3
+                    and legs % 4 < (leg + 1)
+                    or leg > 3
+                    and legs % 4 < (leg + 1) % 4
             ):
                 delta_pos_1 = (parent_h / (legs // 4)) / 2
             else:
@@ -235,17 +236,18 @@ class MoveMixin:
 
     def mouseReleaseEvent(self, event):
         self.custom_mouse_release(event)
-        if event.button() == Qt.LeftButton:
+        if self._old_pos is not None:
             self._old_pos = None
 
     def mouseMoveEvent(self, event):
-        current_pos = self.pos()
-        scene_event_pos = self.mapFromScene(event.pos())
-        scene_old_pos = self.mapFromScene(self._old_pos)
-        delta = scene_event_pos - scene_old_pos
-        new_pos = current_pos + delta
-        new_pos = self.get_new_pos(new_pos, self._max_x_pos, self._max_y_pos)
-        if self._old_pos:
+        new_pos = current_pos = self.pos()
+        if self._old_pos is not None:
+            scene_event_pos = self.mapFromScene(event.pos())
+            scene_old_pos = self.mapFromScene(self._old_pos)
+            delta = scene_event_pos - scene_old_pos
+            new_pos = current_pos + delta
+            new_pos = self.get_new_pos(new_pos, self._max_x_pos,
+                                       self._max_y_pos)
             self.setPos(new_pos)
         self.custom_mouse_move(event, current_pos, new_pos)
 
@@ -325,6 +327,17 @@ class LogicalObject(MoveMixin, Rectangle):
             self._object_legs.append(new_leg)
             self._legs_text.append(new_text)
         self.set_deep(self._deep)
+
+        self.menu = QMenu(self._scene.views()[0])
+        actions = (
+            ('Flip X', self.flip_x),
+            ('Flip Y', self.flip_y),
+        )
+        for action_name, func in actions:
+            new_action = QAction(action_name, self)
+            new_action.triggered.connect(func)
+            self.menu.addAction(new_action)
+
         scene.addItem(self)
         scene.addItem(self.obj_label)
 
@@ -394,6 +407,9 @@ class LogicalObject(MoveMixin, Rectangle):
         self.leg_connector_update()
         self.update_leg_text_pos()
 
+    def contextMenuEvent(self, event):
+        self.menu.exec_(event.screenPos())
+
     def set_passive_color(self, color):
         self._color = QColor(color)
 
@@ -404,7 +420,7 @@ class LogicalObject(MoveMixin, Rectangle):
                 self._project_tree.setCurrentItem(self._tree_item)
 
     def custom_mouse_move(self, event, current_pos, new_pos):
-        if self._old_pos:
+        if self._old_pos is not None:
             self.leg_connector_update()
             self.update_leg_text_pos()
             self.obj_label.setPos(self.obj_label.pos() + new_pos - current_pos)
@@ -496,17 +512,10 @@ class CustomGraphicsView(QGraphicsView):
                 event.buttons(),
                 Qt.KeyboardModifiers(),
             )
+
             self.mouseReleaseEvent(handmade_event)
+        super().mouseReleaseEvent(event)
 
     def keyReleaseEvent(self, event):
         self._current_modifier = None
         event.accept()
-
-
-class CustomSpinBox(QSpinBox):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.name = None
-
-    def wheelEvent(self, event):
-        event.ignore()

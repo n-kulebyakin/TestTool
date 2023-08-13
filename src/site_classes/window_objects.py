@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 import os
 from pathlib import Path
@@ -13,6 +14,7 @@ from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMenu
 from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QSpinBox
 from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtWidgets import QTableWidget
 from PyQt5.QtWidgets import QTableWidgetItem
@@ -21,15 +23,13 @@ from PyQt5.QtWidgets import QTreeWidget
 from PyQt5.QtWidgets import QTreeWidgetItem
 from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWidgets import qApp
-
+from site_classes.scene_objects import CustomGraphicsView
 from site_readers import logic_reader
 from site_readers.command_reader import command_data_parser
 from site_readers.configuration_reader import config_reader
 from site_readers.configuration_reader import get_path_to_key
 from site_readers.data_reader import interlocking_data_parser
 from site_readers.scene_reader import read_scene_data
-from visual_classes.scene_objects import CustomGraphicsView
-from visual_classes.scene_objects import CustomSpinBox
 
 
 class CustomDockWidget(QDockWidget):
@@ -41,6 +41,15 @@ class CustomDockWidget(QDockWidget):
         self.main_widget.setMinimumSize(400, 300)
         self.grid = QGridLayout()
         self.main_widget.setLayout(self.grid)
+
+
+class CustomSpinBox(QSpinBox):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.name = None
+
+    def wheelEvent(self, event):
+        event.ignore()
 
 
 class CustomTreeItem(QTreeWidgetItem):
@@ -144,7 +153,7 @@ class PropertyTable(QTableWidget):
         self.setHorizontalHeaderLabels(header)
         self.setRowCount(self._max_rows)
 
-        for row in range(0, self._max_rows):
+        for row in range(self._max_rows):
             self.hideRow(row)
             for column_num, (col_name, widget, func) in enumerate(tab_data):
                 if widget == "label":
@@ -279,7 +288,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self._proj_path = "E:/ILS2_RF_APRELEVKA-E84CUR/ILS2_RF_APRELEVKA"
+        self._proj_path = "E:/"
         self.setMinimumSize(1000, 600)
         # -------------------------------------------------------------
         self.open_action = QAction("&Open", self)
@@ -287,9 +296,6 @@ class MainWindow(QMainWindow):
 
         self.exit_action = QAction("&Exit", self)
         self.exit_action.triggered.connect(qApp.quit)
-
-        self.rotate_right_action = QAction("&Rotate right", self)
-        self.rotate_left_action = QAction("&Rotate left", self)
 
         self.proj_settings_action = QMenu("&Project settings", self)
         self.color_settings = QAction("Yard colors", self)
@@ -312,11 +318,6 @@ class MainWindow(QMainWindow):
         # init_main_toolbar
         self.main_toolbar = self.addToolBar("Main Tool Bar")
         self.main_toolbar.addAction(self.open_action)
-        # ------------------------------------------------------------
-        # init_action_toolbar
-        self.action_toolbar = self.addToolBar("Action Tool Bar")
-        self.action_toolbar.addAction(self.rotate_right_action)
-        self.action_toolbar.addAction(self.rotate_left_action)
         # ------------------------------------------------------------
         # init_dock_project_tree
         self.project_explorer = ProjectExplorer("Project explorer")
@@ -487,25 +488,36 @@ class ImportSiteDataMixin:
         if not os.path.exists(config_path):
             # TODO: Добавить логирование
             return
-        self.clear_site()
-        self._config_data = config_reader(config_path)
 
+        config = config_reader(config_path)
         parsers = (
             ("CommandTable", self.load_components),
             ("IntData", self.load_data),
             ("ILL_STERNOL_FILE", self.load_logic),
         )
 
-        self.load_coordinates(ils_path)
-
         for key, parser in parsers:
-            self._site_keys[key] = get_path_to_key(self._config_data, key)
-            if not os.path.exists(self._site_keys[key]):
+            path_to_key = get_path_to_key(config, key)
+            if not path_to_key:
                 # TODO: Добавить логирование
                 return
 
-            with open(self._site_keys[key]) as file_data:
+            if not os.path.exists(path_to_key):
+                # TODO: Добавить логирование
+                return
+
+        self.clear_site()
+
+        data_keys = {}
+        for key, parser in parsers:
+            path_to_key = get_path_to_key(config, key)
+            data_keys[key] = path_to_key
+            with open(path_to_key) as file_data:
                 parser(file_data)
+
+        self._site_keys.update(copy.deepcopy(data_keys))
+        self._config_data = copy.deepcopy(config)
+        self.load_coordinates(ils_path)
 
         return True
 
