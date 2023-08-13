@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5.QtWidgets import QSpacerItem
 from PyQt5.QtWidgets import QSpinBox
 from PyQt5.QtWidgets import QTabWidget
+from modeling_classes.connection import SimSocket
 
 # @formatter:off
 SIM_ACTIONS = (
@@ -39,7 +40,6 @@ class SimTab(QTabWidget):
         self._addr = QLineEdit("192.168.0.6")
         self._port = QLineEdit("9090")
         self.connect_button = QPushButton("Connect")
-        self.connect_button.clicked.connect(self.connect_to_sim)
 
         self.spin_id = QSpinBox()
         self.spin_id.setMinimum(1)
@@ -53,8 +53,13 @@ class SimTab(QTabWidget):
         grid.addItem(spacer)
         self.setLayout(grid)
 
-    def connect_to_sim(self):
-        pass
+    @property
+    def sim_ip(self):
+        return self._addr.text()
+
+    @property
+    def sim_port(self):
+        return int(self._port.text())
 
     @property
     def sim_id(self):
@@ -66,8 +71,13 @@ class SimWindow(QMainWindow):
         super().__init__()
         self._sim_tool_bar = self.addToolBar("Simulation tool bar")
         self._site_id = 1
+
         self.simulation = SimTab()
         self.simulation.spin_id.valueChanged.connect(self.set_id)
+        self.simulation.connect_button.clicked.connect(self.connect_to_sim)
+
+        self._socket = SimSocket(self.get_from_sim,
+                                 self.simulation.connect_button)
 
         for name in SIM_ACTIONS:
             action = QAction(name, self)
@@ -104,4 +114,12 @@ class SimWindow(QMainWindow):
             self.send_to_sim(string_to_sent)
 
     def send_to_sim(self, string_to_sent):
+        self._socket.send(string_to_sent)
+
+    def connect_to_sim(self):
+        addr = self.simulation.sim_ip
+        port = self.simulation.sim_port
+        self._socket.open_connection(addr, port)
+
+    def get_from_sim(self, log):
         pass

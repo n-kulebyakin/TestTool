@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QSplashScreen
 
 from modeling_classes.window import SimWindow
+
 from site_classes.color_dialog import OBJECT_COLORS, ObjectColorWindow
 from site_classes.scene_objects import LogicalConnector
 from site_classes.scene_objects import LogicalObject
@@ -281,6 +282,8 @@ class ToolWindow(SimWindow, SiteWindow):
     def __init__(self):
         super().__init__()
         self.property_explorer.tool_box.addItem(self.simulation, "Simulation")
+
+
 
 
 if __name__ == "__main__":
