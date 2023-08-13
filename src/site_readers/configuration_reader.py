@@ -9,7 +9,7 @@ from pathlib import Path
 
 HEADER_PATTERN = r'(?:[\w.-]|".*")+'
 BODY_PATTERN = r'[\w.\-\~\;>]+'
-ADAPT_PATH = os.environ.get('ADAPT_PATH', 'X:/eqv/adapt/')
+ADAPT_PATH = os.environ.get('ADAPT_PATH', 'E:/')
 
 PRODUCT_TYPES = (
     'File',
@@ -86,8 +86,13 @@ def product_save(current_data, out_data, current_path):
     # ссылками на подпродукты
     if current_path.endswith('reference'):
         name, version, old_version = get_name_and_version(current_data[-1])
-        out_data['Products'][name] = {'Name': name, 'version': version, 'old_version': old_version}
+        out_data['Products'][name] = {
+            'Name': name,
+            'version': version,
+            'old_version': old_version
+        }
         return
+
     # Если объектом является стандартный файл или директория,
     # собираем данные в словарь КЛЮЧ:ЗНАЧЕНИЕ
     product_data = dict(zip(current_data[::2], current_data[1::2]))

@@ -78,7 +78,7 @@ def components_analyse(command_data, out_data):
         "Manoeuvres": [],
     }
 
-    # Выбор секции для сохранении данных
+    # Выбор секции для сохранения данных
     current_section = out_data['Components']
     current_component = deepcopy(current_component_temp)
     current_sub_section = None

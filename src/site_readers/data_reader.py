@@ -138,43 +138,44 @@ def log_objects_analyse(interlocking_data, out_data):
     }
     current_section = out_data['Logical_objects']
 
-    current_object = deepcopy(current_object_temp)
+    cur_object = deepcopy(current_object_temp)
     current_sub_section = None
     for line in interlocking_data:
         line = get_line_data(line)
 
-        if line:
-            if line[0] in ('End', 'COS', 'IPU', 'External'):
-                # Если раздел объекта закончен и предыдущий объект
-                # не пустой, то сохранением его данные
-                if current_object['Name']:
-                    current_section[current_object['Name']] = deepcopy(current_object)
-                # Если далее следует не новый объект, то завершаем анализ
-                if line[0] != 'External':
-                    return line[0]
+        if not line:
+            continue
+        if line[0] in ('End', 'COS', 'IPU', 'External'):
+            # Если раздел объекта закончен и предыдущий объект
+            # не пустой, то сохранением его данные
+            if cur_object['Name']:
+                current_section[cur_object['Name']] = deepcopy(cur_object)
+            # Если далее следует не новый объект, то завершаем анализ
+            if line[0] != 'External':
+                return line[0]
 
-                # Обнуляем текущую информацию об объекте
-                current_object = deepcopy(current_object_temp)
-                current_object['Name'] = line[2]
-                current_object['Type'] = line[4]
-                continue
+            # Обнуляем текущую информацию об объекте
+            cur_object = deepcopy(current_object_temp)
+            cur_object['Name'] = line[2]
+            cur_object['Type'] = line[4]
+            continue
 
-            # Выбор подраздела объекта по заголовку
-            if line[0] == 'Order':
-                # Заголовки одинаковые, но информация различается
-                # для передачи в контроллеры и в другие объекты
-                if current_sub_section != 'Ofw':
-                    current_sub_section = 'Ofw'
-                else:
-                    current_sub_section = 'Order'
-            elif line[0] in analyse_func:
-                # Если строка начинается с ключевого слова
-                # то изменяем текущую подсекцию
-                current_sub_section = line[0]
+        # Выбор подраздела объекта по заголовку
+        if line[0] == 'Order':
+            # Заголовки одинаковые, но информация различается
+            # для передачи в контроллеры и в другие объекты
+            if current_sub_section != 'Ofw':
+                current_sub_section = 'Ofw'
             else:
-                # Обработка строки в соответствии с текущей подсекцией
-                current_func = analyse_func[current_sub_section]
-                current_func(line, current_object)
+                current_sub_section = 'Order'
+        elif line[0] in analyse_func:
+            # Если строка начинается с ключевого слова,
+            # то изменяем текущую подсекцию
+            current_sub_section = line[0]
+        else:
+            # Обработка строки в соответствии с текущей подсекцией
+            current_func = analyse_func[current_sub_section]
+            current_func(line, cur_object)
 
 
 def cos_objects_analyse(interlocking_data, out_data):
