@@ -21,21 +21,23 @@ class SimSocket(QTcpSocket):
     def open_connection(self, host, port):
         self.connectToHost(host, int(port))
         self._button.setText("Attempt...")
-        print('OPEN')
 
     def close(self):
         self.disconnectFromHost()
         self._button.setText("Connect")
-        print('CLOSE')
-
-
+        self.clear()
 
     def on_connected(self):
         self._button.setText("Disconnect")
+        self.clear()
 
     def on_disconnect(self):
         self._button.setText("Connect")
+        self.clear()
 
+    def clear(self):
+        self._data = ""
+        self._queue.clear()
 
     def send(self, command):
         if self._data:
@@ -46,8 +48,6 @@ class SimSocket(QTcpSocket):
     def on_error(self):
         self.close()
         self._button.setText("Connect")
-        print('ERROR')
-
 
     def on_ready_read(self):
         while self.bytesAvailable():

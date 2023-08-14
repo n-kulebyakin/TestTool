@@ -43,7 +43,7 @@ def print_endblock(painter, half_height, width, border):
 
 def paint_graphic(obj_type, painter, height, width, border):
     """
-    Функция отрисовки значка объекта в соотвествии с его типом
+    Функция отрисовки значка объекта в соответствии с его типом
     """
 
     height = int(height)

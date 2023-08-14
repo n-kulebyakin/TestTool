@@ -179,6 +179,10 @@ class PropertyExplorer(CustomDockWidget):
 
     def __init__(self, title):
         super().__init__(title)
+
+        self._socket = None
+        self._site_id = None
+
         self._max_settings_rows = 200
         self.property_tab = QTabWidget()
 
@@ -273,8 +277,20 @@ class PropertyExplorer(CustomDockWidget):
                       self.command_table):
             table.hide_not_used_rows(0)
 
-    def send_component(self):
-        pass
+    def set_socket(self, sim_socket):
+        self._socket = sim_socket
+
+    def set_site_id(self, site_id):
+        self._site_id = site_id
+
+    def send_component(self, line, colum):
+
+        if self._socket is not None:
+            comm_type = self.command_table.item(line, 0).text()
+            comm_param = self.command_table.item(line, 1).text()
+            out_str = "{0}/cmd {1} {2}\n".format(self._site_id,
+                                                 comm_type,
+                                                 comm_param)
 
     def set_status(self):
         pass

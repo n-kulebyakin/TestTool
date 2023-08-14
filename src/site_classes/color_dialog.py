@@ -25,7 +25,8 @@ class ObjectColorWindow(QDialog):
     На выход принимает словарь цветов объектов по умолчанию
     и список логических объектов отображаемых на сцене.
     """
-
+    # TODO: Добавить сброс настройки цветов
+    #  при отмене или закрытие окна
     def __init__(self, colors, visual_objects):
         super().__init__()
         self._changed_item = []
@@ -66,7 +67,7 @@ class ObjectColorWindow(QDialog):
 
         # Проверяем отличается ли выбранный цвет от текущего
         if color_name != color_item.text():
-            color_item.setText(color)
+            color_item.setText(color_name)
             log_type = self._color_table.item(row, 0).text()
             # Сохраняем выбранный цвет для типа объекта
             self._objects_colors[log_type] = color_name
@@ -82,7 +83,7 @@ class ObjectColorWindow(QDialog):
         for obj in self._objects:
             obj_type = self._objects[obj].log_type
             # Проверяем изменился ли цвет для данного типа
-            if obj_type == self._changed_item:
+            if obj_type in self._changed_item:
                 color = self._objects_colors[obj_type]
                 # Применяем новый цвет к объекту
                 self._objects[obj].accept_new_colors(color)

@@ -9,7 +9,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QSplashScreen
 
 from modeling_classes.window import SimWindow
-
 from site_classes.color_dialog import OBJECT_COLORS, ObjectColorWindow
 from site_classes.scene_objects import LogicalConnector
 from site_classes.scene_objects import LogicalObject
@@ -83,7 +82,7 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
                 v_obj.move(faulty_pos_x,
                            faulty_pos_y)
                 faulty_pos_x += 100
-        for x in range(5):
+        for _ in range(5):
             self.set_pos_from_obj_with_legs(obj_with_legs)
 
     def set_pos_from_obj_with_legs(self, objs_with_legs):
@@ -282,8 +281,6 @@ class ToolWindow(SimWindow, SiteWindow):
     def __init__(self):
         super().__init__()
         self.property_explorer.tool_box.addItem(self.simulation, "Simulation")
-
-
 
 
 if __name__ == "__main__":

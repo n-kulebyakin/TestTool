@@ -211,6 +211,7 @@ class LogicalLeg(Rectangle):
     _height = 8
     _border = 0
     _offset = 4
+
     def __init__(self, name, legs_num, parent_height, parent):
         super().__init__(parent)
         # Устанавливаем размеры по умолчанию
@@ -261,8 +262,6 @@ class LogicalLeg(Rectangle):
         if event.button() == Qt.LeftButton:
             event.accept()
 
-
-
     @staticmethod
     def get_pos(leg, legs, parent_w, parent_h, height, width, border):
         """
@@ -308,8 +307,9 @@ class MoveMixin:
     позволяло вытащить объект за пределы
     сцены.
     """
-    def __init__(self):
-        self._old_pos = None
+
+    # def __init__(self):
+    #    self._old_pos = None
 
     @staticmethod
     def get_new_pos(new_pos, max_x, max_y):
@@ -546,7 +546,6 @@ class LogicalObject(MoveMixin, Rectangle):
 
         super().deleteLater()
 
-
     @property
     def name(self):
         return self._name
@@ -573,6 +572,7 @@ class LogicalObject(MoveMixin, Rectangle):
             # Если объект не выделен,
             # обновляем текущий цвет
             self._color = self._passive_color
+        self.update()
 
     def set_deep(self, deep):
         """
@@ -708,7 +708,6 @@ class LogicalObject(MoveMixin, Rectangle):
             # текста с небольшим смещение
             leg_text.setPos(leg_pos.x() + 2, leg_pos.y() + 6)
 
-
     def move(self, x, y):
         """
         Метод перемещения объекта
@@ -798,7 +797,7 @@ class CustomGraphicsView(QGraphicsView):
             # Получение изменение координаты колеса
             wheel_move = event.angleDelta().y()
             # В зависимости от направления движения
-            # колеса увеличиваем или уменьшаем машстаб
+            # колеса увеличиваем или уменьшаем масштаб
             if wheel_move > 0 and self._max_scale > self._current_scale:
                 self._current_scale = self._current_scale * self._ratio
                 self.scale(self._ratio, self._ratio)
@@ -844,10 +843,20 @@ class CustomGraphicsView(QGraphicsView):
             # Передаём дальше изменённое событие
             self.mousePressEvent(handmade_event)
         # Передаём первоначальное событие
+        # для последующей обработки
         super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event):
+        """
+        Стандартное событие PyQT
+        отпускание клавиши мыши.
+        """
+
         if event.button() == Qt.MidButton:
+            # По аналогии с нажатием клавиш,
+            # если была отпущена средняя кнопка
+            # мыши, то дополнительно передаём
+            # событие с отпусканием левой кнопки
             self.setDragMode(self.NoDrag)
             handmade_event = QMouseEvent(
                 QEvent.MouseButtonRelease,
@@ -856,10 +865,14 @@ class CustomGraphicsView(QGraphicsView):
                 event.buttons(),
                 Qt.KeyboardModifiers(),
             )
-
             self.mouseReleaseEvent(handmade_event)
         super().mouseReleaseEvent(event)
 
     def keyReleaseEvent(self, event):
+        """
+        Стандартное событие PyQT
+        нажатия клавиши мыши.
+        """
+        # Обнуляем запомненную ранее клавишу
         self._current_modifier = None
         event.accept()
