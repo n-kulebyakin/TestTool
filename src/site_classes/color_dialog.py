@@ -37,7 +37,7 @@ class ObjectColorWindow(QDialog):
         self.setGeometry(400, 400, 250, 300)
         self.setLayout(self._layout)
 
-        # Запрещаем изменение значений данных в таблице
+        # Запрет на изменение значений данных в таблице напрямую
         self._color_table.setEditTriggers(self._color_table.NoEditTriggers)
         self._color_table.setColumnCount(2)
         self._color_table.setHorizontalHeaderLabels(["Type", "Value"])
@@ -55,7 +55,7 @@ class ObjectColorWindow(QDialog):
 
     def show_color_dialog(self, row, column):
         """
-        Функция отображения окна с палитрой цветов
+        Метод отображения окна с палитрой цветов
         """
         # Если была нажата не первая колонка таблицы, то возвращаемся
         if column != 1:
@@ -77,7 +77,7 @@ class ObjectColorWindow(QDialog):
 
     def accept_changes(self):
         """
-        Функция применения изменённых цветов к объектам
+        Метод применения изменённых цветов к объектам
         """
         for obj in self._objects:
             obj_type = self._objects[obj].log_type

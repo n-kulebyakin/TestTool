@@ -42,10 +42,15 @@ def print_endblock(painter, half_height, width, border):
 
 
 def paint_graphic(obj_type, painter, height, width, border):
+    """
+    Функция отрисовки значка объекта в соотвествии с его типом
+    """
+
     height = int(height)
     width = int(width)
     half_height = height // 2
     half_width = width // 2
+
     pen = QPen(QColor("black"))
     pen.setWidth(2)
     painter.setPen(pen)
@@ -53,7 +58,6 @@ def paint_graphic(obj_type, painter, height, width, border):
     if obj_type == "SHSIGNAL":
         paint_shsignal(painter, half_height, border)
     elif obj_type == "SIGNAL":
-
         paint_signal(painter, half_height, border)
     elif obj_type == "POINT":
         paint_point(painter, half_height, half_width, width, border)
