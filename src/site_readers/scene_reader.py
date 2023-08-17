@@ -65,6 +65,8 @@ def read_scene_data(file_path):
         for attr in ("m11", "m12", "m21", "m22"):
             logical_objects[obj_name][attr] = int(float(node_items[attr][0:8]))
 
+    logical_objects["sceneWidth"] = max_x
+    logical_objects["sceneHeight"] = max_y
     # Если файл был сохранён специальной программой,
     # то он МОЖЕТ хранить данные о необходимом размере сцены
     rem_2 = None

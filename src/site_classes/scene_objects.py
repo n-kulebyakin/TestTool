@@ -308,9 +308,6 @@ class MoveMixin:
     сцены.
     """
 
-    # def __init__(self):
-    #    self._old_pos = None
-
     @staticmethod
     def get_new_pos(new_pos, max_x, max_y):
         """
@@ -439,7 +436,7 @@ class LogicalObject(MoveMixin, Rectangle):
 
     def __init__(self, name, object_data, deep, scene, colors, project_tree):
         super().__init__()
-
+        self._old_pos = None
         self.resize(self._weight, self._height)
 
         self._current_angle = 0

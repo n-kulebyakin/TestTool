@@ -94,7 +94,7 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
             for leg in log_obj["legs"]:
                 neighbour = log_obj["legs"][leg]["neighbour"]
                 n_obj = self._visual_objects[neighbour]
-                neigh_pos = n_obj.object_view.pos()
+                neigh_pos = n_obj.pos()
                 new_x = abs(neigh_pos.x())
                 new_y = abs(neigh_pos.y())
                 if new_x > 10:
@@ -191,6 +191,8 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
         out_table.hide_not_used_rows(max_row_num)
 
     def config_obj_settings_other(self, obj_name, settings_name, out_table):
+        if settings_name not in self._logical_objects[obj_name]:
+            return
         settings_data = self._logical_objects[obj_name][settings_name]
 
         sorted_keys = sorted(settings_data)

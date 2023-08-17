@@ -9,7 +9,7 @@ from pathlib import Path
 
 HEADER_PATTERN = r'(?:[\w.-]|".*")+'
 BODY_PATTERN = r'[\w.\-\~\;>]+'
-ADAPT_PATH = os.environ.get('ADAPT_PATH', 'E:/')
+ADAPT_PATH = os.environ.get('ADAPT_PATH', 'X:/eqv/adapt')
 
 PRODUCT_TYPES = (
     'File',
@@ -59,8 +59,13 @@ def get_name_and_version(obj_name):
     """
     version = '0'
     old_version = ''
+    t = open('asdf', 'w+')
+    t.write(obj_name)
+    
+    t.close()
+
     if '-' in obj_name:
-        obj_name, version = obj_name.rsplit('-')
+        obj_name, version = obj_name.rsplit('-', maxsplit=1)
     if '>' in version:
         old_version, version = version.split('>')
     return obj_name, version, old_version
