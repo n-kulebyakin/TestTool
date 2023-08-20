@@ -14,6 +14,8 @@ from site_classes.scene_objects import LogicalConnector
 from site_classes.scene_objects import LogicalObject
 from site_classes.window_objects import ImportSiteDataMixin
 from site_classes.window_objects import MainWindow
+from site_readers.log_reader import log_data_parser
+from site_readers.log_reader import object_variable_parser
 
 
 class SiteWindow(ImportSiteDataMixin, MainWindow):
@@ -291,6 +293,17 @@ class ToolWindow(SimWindow, SiteWindow):
         individualization = self.property_explorer.i_table
         individualization.connect_value_change(1, self.send_ibit)
 
+        self._socket.set_out_function(self.get_data_from_sim)
+
+    def select_tree_item(self, tree_item):
+        if self._socket.isOpen():
+            obj_name = tree_item.text(0)
+            out_str = '{}/variables {}\n'.format(self._site_id,
+                                                 obj_name)
+            self._socket.send(out_str)
+
+        super().select_tree_item(tree_item)
+
     def send_status(self):
         if self._changing_object or not self._socket.isOpen():
             return
@@ -304,15 +317,15 @@ class ToolWindow(SimWindow, SiteWindow):
         status_obj = obj_data['status'][status_name]['ipu']
 
         if status_obj and '.' not in status_obj:
-            send_str = '{0}/yard {1} try_set {2}\n'.format(self._site_id,
-                                                           status_obj,
-                                                           value)
+            out_str = '{0}/yard {1} try_set {2}\n'.format(self._site_id,
+                                                          status_obj,
+                                                          value)
         else:
-            send_str = '{0}/check {1}.{2}={3}\n'.format(self._site_id,
-                                                        obj_name,
-                                                        status_name,
-                                                        value)
-        self._socket.send(send_str)
+            out_str = '{0}/check {1}.{2}={3}\n'.format(self._site_id,
+                                                       obj_name,
+                                                       status_name,
+                                                       value)
+        self._socket.send(out_str)
 
     def send_component(self, line, column):
         if self._socket.isOpen():
@@ -334,6 +347,13 @@ class ToolWindow(SimWindow, SiteWindow):
                                                      self.sender().name,
                                                      self.sender().value())
         self._socket.send(out_str)
+
+    def get_data_from_sim(self, sim_data):
+        if self._changing_object:
+            new_data = object_variable_parser(sim_data, self._changing_object)
+        else:
+            new_data = log_data_parser(sim_data)
+        self._logical_objects.update(new_data)
 
 
 if __name__ == "__main__":
