@@ -11,7 +11,7 @@ def get_x_y_data(node_data):
     полученной из файла
     """
 
-    # Файлы могут содержатm разные разделители
+    # Файлы могут содержать разные разделители
     # целой и дробной части, по этому
     # отрезаем дробную часть в любом случае
     if "," in node_data:
@@ -65,7 +65,9 @@ def read_scene_data(file_path):
         for attr in ("m11", "m12", "m21", "m22"):
             logical_objects[obj_name][attr] = int(float(node_items[attr][0:8]))
 
-    # Если файл был сохранён специальной программой,
+    logical_objects["sceneWidth"] = max_x
+    logical_objects["sceneHeight"] = max_y
+    # Если файл был сохранён программой,
     # то он МОЖЕТ хранить данные о необходимом размере сцены
     rem_2 = None
     if file_path.endswith('LogicScene.xml'):

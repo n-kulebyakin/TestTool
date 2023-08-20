@@ -23,7 +23,7 @@ def get_line_data(line):
 def line_iteration(input_data):
     """
     Функция итерации по исходным данным.
-    Возвращает информацию является
+    Возвращает информацию - является
     ли строка концом раздела
     и значение самой строки
     """
@@ -317,7 +317,7 @@ def obj_analyse(input_data, out_data, obj_type):
             # Если дошли до конца файла или до
             # следующего объекта сохраняем информацию
             # и выходим из функции
-            if line == '#END' or line[0][1:] in out_data['OBJ']:
+            if line[0] == '#END' or line[0][1:] in out_data['OBJ']:
                 out_data[obj_type[0][1:]] = deepcopy(obj_data)
                 # Возвращаем из функции строку,
                 # так как она может содержать имя
@@ -326,6 +326,7 @@ def obj_analyse(input_data, out_data, obj_type):
             # Если встречается знак #,
             # то изменяем текущую подсекцию
             if line[0][0] == '#':
+
                 sub_section = line[0]
                 continue
             analyse_func[sub_section](line, obj_data)
@@ -450,3 +451,10 @@ def get_logical_type_names(logic_data):
     Функция получения списка логических типов
     """
     return list(logic_data["OBJ"].keys())
+
+
+def get_default_value(i_bit, obj_type, logic_data):
+    if i_bit in get_ibits_list(obj_type, logic_data):
+        return logic_data[obj_type]['#IN'][i_bit]['init']
+    else:
+        return -1
