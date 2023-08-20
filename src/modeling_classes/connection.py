@@ -7,16 +7,19 @@ class SimSocket(QTcpSocket):
     """
     _timeout = 1
 
-    def __init__(self, out_function, state_button):
+    def __init__(self, state_button):
         super().__init__()
         self._queue = []
         self._data = ""
         self._button = state_button
-        self._out = out_function
+        self._out = None
         self.waitForConnected(self._timeout)
         self.readyRead.connect(self.on_ready_read)
         self.connected.connect(self.on_connected)
         self.error.connect(self.on_error)
+
+    def set_out_function(self, func):
+        self._out = func
 
     def open_connection(self, host, port):
         self.connectToHost(host, int(port))
@@ -53,7 +56,8 @@ class SimSocket(QTcpSocket):
         while self.bytesAvailable():
             self._data += str(self.readAll())[2:-1]
         if self._data.endswith("* > "):
-            self._out(self._data)
+            if self._out:
+                self._out(self._data)
             self._data = ""
             if self._queue:
                 self.send(self._queue.pop())

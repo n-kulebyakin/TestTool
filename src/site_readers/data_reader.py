@@ -23,10 +23,8 @@ def leg_analyse(line, current_obj):
     Информация о соседних объектах и их соединении
     собирается для каждого вывода объекта
     """
-    current_obj['legs'][line[0]] = {
-        "neighbour": line[1],
-        "neighbour_leg": line[2],
-    }
+    current_obj['legs'][line[0]] = {"neighbour": line[1],
+                                    "neighbour_leg": line[2], }
 
 
 def individ_analyse(line, current_obj):
@@ -106,36 +104,20 @@ def log_objects_analyse(interlocking_data, out_data):
     """
 
     # Шаблон структуры данных объекта
-    current_object_temp = {
-        "Name": '',
-        "Type": '',
-        "legs": {},
-        "individualizations": {},
-        "orders": {},
-        "status": {},
-        "indication": {},
-        "ITI": [],
-        "ofw": {},
-        "incoming": {},
-        "telegram": [],
-        "command": {},
-        "Check": [],
-    }
+    current_object_temp = {"Name": '', "Type": '', "legs": {},
+                           "individualizations": {}, "orders": {},
+                           "status": {}, "indication": {}, "ITI": [],
+                           "ofw": {}, "incoming": {}, "telegram": [],
+                           "command": {}, "Check": [], }
 
     # Функции анализа атрибутов объекта
     # собраны для удобства вызова
     # в пары ключевое слово:функция
-    analyse_func = {
-        'Leg': leg_analyse,
-        'Individualizations': individ_analyse,
-        'Ofw': ofw_analyse,
-        'Order': order_analyse,
-        'Status': status_analyse,
-        'Indication': indication_analyse,
-        'Command': automaton_analyse,
-        'Telegram': telegram_analyse,
-        'Check': connection_check_analyse,
-    }
+    analyse_func = {'Leg': leg_analyse, 'Individualizations': individ_analyse,
+                    'Ofw': ofw_analyse, 'Order': order_analyse,
+                    'Status': status_analyse, 'Indication': indication_analyse,
+                    'Command': automaton_analyse, 'Telegram': telegram_analyse,
+                    'Check': connection_check_analyse, }
     current_section = out_data['Logical_objects']
 
     cur_object = deepcopy(current_object_temp)
@@ -188,10 +170,8 @@ def cos_objects_analyse(interlocking_data, out_data):
             if line[0] == 'End':
                 return line[0]
 
-            out_data['COS_objects'][line[0]] = {
-                "Type": line[1],
-                "Number": line[2],
-            }
+            out_data['COS_objects'][line[0]] = {"Type": line[1],
+                                                "Number": line[2], }
 
 
 def ipu_objects_analyse(interlocking_data, out_data):
@@ -205,12 +185,10 @@ def ipu_objects_analyse(interlocking_data, out_data):
             if line[0] in ('End', 'COS',):
                 return line[0]
 
-            out_data['IPU_objects'][line[0]] = {
-                "Yard": line[1],
-                "Type": line[2],
-                "COS": line[3],
-                "Consists": line[4:],
-            }
+            out_data['IPU_objects'][line[0]] = {"Yard": line[1],
+                                                "Type": line[2],
+                                                "COS": line[3],
+                                                "Consists": line[4:], }
 
 
 def add_cfw(out_data, obj_name, ils_id=""):
@@ -225,16 +203,13 @@ def add_cfw(out_data, obj_name, ils_id=""):
     # Для всех направлений приказа добавляем информацию
     # об объекте передачи в объект приёма
     for ofw in out_data[obj_name]["ofw"]:
-        for log_obj, check in zip(
-                out_data[obj_name]["ofw"][ofw]["ipu"][::2],
-                out_data[obj_name]["ofw"][ofw]["ipu"][1::2],
-        ):
+        for log_obj, check in zip(out_data[obj_name]["ofw"][ofw]["ipu"][::2],
+                                  out_data[obj_name]["ofw"][ofw]["ipu"][
+                                  1::2], ):
             if ils_id:
                 log_obj = log_obj + "-" + ils_id
-            out_data[log_obj]["status"][check] = {
-                "value": 0,
-                "ipu": obj_name + "." + ofw,
-            }
+            ipu = obj_name + "." + ofw
+            out_data[log_obj]["status"][check] = {"value": 0, "ipu": ipu}
 
 
 def ofw_cfw_mapping(out_data):
@@ -242,11 +217,8 @@ def ofw_cfw_mapping(out_data):
     Функция обвязки приказ - статус для свободного монтажа
     """
     # Собираем все объекты в которых есть нужные приказы
-    objects_with_ofw = [
-        _
-        for _ in out_data["Logical_objects"]
-        if out_data["Logical_objects"][_]["ofw"]
-    ]
+    objects_with_ofw = [_ for _ in out_data["Logical_objects"] if
+                        out_data["Logical_objects"][_]["ofw"]]
 
     for log_obj in objects_with_ofw:
         add_cfw(out_data["Logical_objects"], log_obj)
@@ -261,13 +233,8 @@ def interlocking_data_parser(interlocking_data):
     структурой распознается на более ранних этапах тестирования.
     """
     current_section = 'Header'
-    out_data = {
-        'Header': {},
-        'Logical_objects': {},
-        'IPU_objects': {},
-        'COS_objects': {},
-        'Site_product_name': '',
-    }
+    out_data = {'Header': {}, 'Logical_objects': {}, 'IPU_objects': {},
+                'COS_objects': {}, 'Site_product_name': '', }
     for line in interlocking_data:
 
         line = get_line_data(line)

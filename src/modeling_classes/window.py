@@ -76,8 +76,7 @@ class SimWindow(QMainWindow):
         self.simulation.spin_id.valueChanged.connect(self.set_id)
         self.simulation.connect_button.clicked.connect(self.connect_to_sim)
 
-        self._socket = SimSocket(self.get_from_sim,
-                                 self.simulation.connect_button)
+        self._socket = SimSocket(self.simulation.connect_button)
 
         for name in SIM_ACTIONS:
             action = QAction(name, self)
@@ -114,12 +113,10 @@ class SimWindow(QMainWindow):
             self.send_to_sim(string_to_sent)
 
     def send_to_sim(self, string_to_sent):
-        self._socket.send(string_to_sent)
+        if self._socket.isOpen():
+            self._socket.send(string_to_sent)
 
     def connect_to_sim(self):
         addr = self.simulation.sim_ip
         port = self.simulation.sim_port
         self._socket.open_connection(addr, port)
-
-    def get_from_sim(self, log):
-        pass

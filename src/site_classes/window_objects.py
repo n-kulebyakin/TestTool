@@ -164,8 +164,8 @@ class PropertyTable(QTableWidget):
                 else:
                     new_item = CustomSpinBox()
                     self.setCellWidget(row, column_num, new_item)
-                if func:
-                    new_item.valueChanged.connect(func)
+                # if func:
+                #     new_item.valueChanged.connect(func)
 
     def hide_not_used_rows(self, start_row):
         if start_row > 0:
@@ -173,6 +173,11 @@ class PropertyTable(QTableWidget):
 
         for row_num in range(start_row, self._max_rows):
             self.hideRow(row_num)
+
+    def connect_value_change(self, column, func):
+        for row in range(self._max_rows):
+            cell_item = self.cellWidget(row, column)
+            cell_item.valueChanged.connect(func)
 
 
 class PropertyExplorer(CustomDockWidget):
@@ -195,7 +200,7 @@ class PropertyExplorer(CustomDockWidget):
         self.grid.addWidget(self.tool_box, 1, 0, 1, 5)
 
         tab_data = (("Name", "label", None),
-                    ("Value", "spin", self.send_change_ibit),
+                    ("Value", "spin", None),
                     ("Description", "label", None),
                     )
 
@@ -208,11 +213,11 @@ class PropertyExplorer(CustomDockWidget):
                     ("Value", "label", None),
                     )
 
-        self.free_wiredes = PropertyTable(tab_data)
+        self.free_wired = PropertyTable(tab_data)
 
         tab_data = (("Status", "label", None),
                     ("IPU object", "label", None),
-                    ("Value", "spin", self.set_status),
+                    ("Value", "spin", None),
                     )
 
         self.statuses = PropertyTable(tab_data)
@@ -250,10 +255,8 @@ class PropertyExplorer(CustomDockWidget):
 
         self.command_table = PropertyTable(tab_data)
 
-        self.command_table.cellDoubleClicked.connect(self.send_component)
-
         self.property_tab.addTab(self.i_table, "I_BIT")
-        self.property_tab.addTab(self.free_wiredes, "Free wired")
+        self.property_tab.addTab(self.free_wired, "Free wired")
         self.property_tab.addTab(self.statuses, "Status")
         self.property_tab.addTab(self.orders, "Orders")
         self.property_tab.addTab(self.indications, "Indications")
@@ -265,7 +268,7 @@ class PropertyExplorer(CustomDockWidget):
 
     def clear_properties(self):
         for table in (self.i_table,
-                      self.free_wiredes,
+                      self.free_wired,
                       self.statuses,
                       self.orders,
                       self.indications,
@@ -273,46 +276,6 @@ class PropertyExplorer(CustomDockWidget):
                       self.channels,
                       self.command_table):
             table.hide_not_used_rows(0)
-
-
-    def send_component(self, line, colum):
-        pass
-
-    def set_status(self):
-        pass
-
-    def send_change_ibit(self):
-        pass
-
-
-class PropertyExplorerWithSim(PropertyExplorer):
-
-    def __init__(self, title):
-        super().__init__(title)
-        self._socket = None
-        self._site_id = None
-
-    def set_socket(self, sim_socket):
-        self._socket = sim_socket
-
-    def set_site_id(self, site_id):
-        self._site_id = site_id
-
-    def send_component(self, line, colum):
-
-        if self._socket is not None:
-            comm_type = self.command_table.item(line, 0).text()
-            comm_param = self.command_table.item(line, 1).text()
-            out_str = "{0}/cmd {1} {2}\n".format(self._site_id,
-                                                 comm_type,
-                                                 comm_param)
-
-    def set_status(self):
-        pass
-
-    def send_change_ibit(self):
-        pass
-
 
 
 class MainWindow(QMainWindow):
@@ -380,14 +343,17 @@ class MainWindow(QMainWindow):
 
 
 class ImportSiteDataMixin:
-    _config_data = {}
-    _site_keys = {}
-    _components = {}
-    _logical_objects = {}
-    _ipu_objects = {}
-    _product_name = {}
-    _logic_data = {}
-    _coordinates = {}
+
+    def __init__(self):
+        super().__init__()
+        self._config_data = {}
+        self._site_keys = {}
+        self._components = {}
+        self._logical_objects = {}
+        self._ipu_objects = {}
+        self._product_name = {}
+        self._logic_data = {}
+        self._coordinates = {}
 
     def load_coordinates(self, path):
         cad_path = os.path.join(path, "LogicScene.xml")

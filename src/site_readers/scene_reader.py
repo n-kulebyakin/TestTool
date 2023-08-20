@@ -67,7 +67,7 @@ def read_scene_data(file_path):
 
     logical_objects["sceneWidth"] = max_x
     logical_objects["sceneHeight"] = max_y
-    # Если файл был сохранён специальной программой,
+    # Если файл был сохранён программой,
     # то он МОЖЕТ хранить данные о необходимом размере сцены
     rem_2 = None
     if file_path.endswith('LogicScene.xml'):

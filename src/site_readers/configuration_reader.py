@@ -9,12 +9,9 @@ from pathlib import Path
 
 HEADER_PATTERN = r'(?:[\w.-]|".*")+'
 BODY_PATTERN = r'[\w.\-\~\;>]+'
-ADAPT_PATH = os.environ.get('ADAPT_PATH', 'X:/eqv/adapt')
+ADAPT_PATH = os.environ.get('ADAPT_PATH', 'E:/')
 
-PRODUCT_TYPES = (
-    'File',
-    'Directory',
-)
+PRODUCT_TYPES = ('File', 'Directory',)
 
 
 def get_line_data(line, word_pattern):
@@ -59,10 +56,6 @@ def get_name_and_version(obj_name):
     """
     version = '0'
     old_version = ''
-    t = open('asdf', 'w+')
-    t.write(obj_name)
-    
-    t.close()
 
     if '-' in obj_name:
         obj_name, version = obj_name.rsplit('-', maxsplit=1)
@@ -77,25 +70,15 @@ def product_save(current_data, out_data, current_path):
     """
     if not current_data:
         return
-    temp_product = {
-        'Name': '',
-        'Type': '',
-        'Identity': '',
-        'Key': [],
-        'version': '',
-        'old_version': '',
-        'Path': '',
-    }
+    temp_product = {'Name': '', 'Type': '', 'Identity': '', 'Key': [],
+                    'version': '', 'old_version': '', 'Path': '', }
     # Если директория раздела reference,
     # то объекты из этой директории являются
     # ссылками на подпродукты
     if current_path.endswith('reference'):
         name, version, old_version = get_name_and_version(current_data[-1])
-        out_data['Products'][name] = {
-            'Name': name,
-            'version': version,
-            'old_version': old_version
-        }
+        out_data['Products'][name] = {'Name': name, 'version': version,
+                                      'old_version': old_version}
         return
 
     # Если объектом является стандартный файл или директория,
@@ -125,10 +108,7 @@ def path_analyse(last_line, config_data, file_path):
     """
     Функция анализа разделов PATH конфигурации
     """
-    out_data = {'Files': [],
-                'Products': {},
-                'Directories': [],
-                }
+    out_data = {'Files': [], 'Products': {}, 'Directories': [], }
 
     # Получаем абсолютный путь, до каталога
     # содержащего конфигурационный путь
@@ -202,11 +182,8 @@ def get_path_to_product(product_data, adapt_path=ADAPT_PATH):
     до конфигурационного файла подпродукта
     """
     product = product_data['Name'] + '-' + product_data['version']
-    product_path = os.path.join(adapt_path,
-                                product_data['Name'],
-                                product,
-                                product_data['Name'],
-                                'ConfigInfo.CI')
+    product_path = os.path.join(adapt_path, product_data['Name'], product,
+                                product_data['Name'], 'ConfigInfo.CI')
     if os.path.exists(product_path):
         return product_path
 
@@ -266,8 +243,9 @@ def get_file_with_key(config_information, key):
         # требуемому ключу
         # Нахождение ключа в начале списка указывает
         # на его актуальную версию
-        files_and_directories = (config_information.get('Files')
-                                 + config_information.get('Files'))
+        files = config_information.get('Files', [])
+        directories = config_information.get('Directories', [])
+        files_and_directories = files + directories
         for proj_file in files_and_directories:
             if key in proj_file.get('Key'):
                 return proj_file

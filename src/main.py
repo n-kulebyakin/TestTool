@@ -140,7 +140,6 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
             return
         imported = self.import_site_data(config_path)
         if imported:
-
             self._selected_obj = None
             for obj in list(self._visual_objects):
                 self._visual_objects[obj].deleteLater()
@@ -268,7 +267,7 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
         self.config_obj_settings_other(obj_name, "status",
                                        self.property_explorer.statuses)
         self.config_obj_settings_other(obj_name, "ofw",
-                                       self.property_explorer.free_wiredes)
+                                       self.property_explorer.free_wired)
         self.config_obj_settings_other(obj_name, "indication",
                                        self.property_explorer.indications)
         self.config_obj_settings_other(obj_name, "variables",
@@ -282,7 +281,59 @@ class SiteWindow(ImportSiteDataMixin, MainWindow):
 class ToolWindow(SimWindow, SiteWindow):
     def __init__(self):
         super().__init__()
+
         self.property_explorer.tool_box.addItem(self.simulation, "Simulation")
+        statuses = self.property_explorer.statuses
+        statuses.connect_value_change(2, self.send_status)
+        self.command_table = self.property_explorer.command_table
+        self.command_table.cellDoubleClicked.connect(self.send_component)
+
+        individualization = self.property_explorer.i_table
+        individualization.connect_value_change(1, self.send_ibit)
+
+    def send_status(self):
+        if self._changing_object or not self._socket.isOpen():
+            return
+
+        obj_name = self._selected_obj
+
+        value = self.sender().value()
+        status_name = self.sender().name
+
+        obj_data = self._logical_objects[obj_name]
+        status_obj = obj_data['status'][status_name]['ipu']
+
+        if status_obj and '.' not in status_obj:
+            send_str = '{0}/yard {1} try_set {2}\n'.format(self._site_id,
+                                                           status_obj,
+                                                           value)
+        else:
+            send_str = '{0}/check {1}.{2}={3}\n'.format(self._site_id,
+                                                        obj_name,
+                                                        status_name,
+                                                        value)
+        self._socket.send(send_str)
+
+    def send_component(self, line, column):
+        if self._socket.isOpen():
+            comm_type = self.command_table.item(line, 0).text()
+            comm_param = self.command_table.item(line, 1).text()
+            out_str = "{0}/cmd {1} {2}\n".format(self._site_id,
+                                                 comm_type,
+                                                 comm_param)
+
+            self._socket.send(out_str)
+
+    def send_ibit(self):
+        if self._changing_object or not self._socket.isOpen():
+            return
+
+        obj_name = self._selected_obj
+        out_str = '{0}/individ {1}.{2}={3}\n'.format(self._site_id,
+                                                     obj_name,
+                                                     self.sender().name,
+                                                     self.sender().value())
+        self._socket.send(out_str)
 
 
 if __name__ == "__main__":
