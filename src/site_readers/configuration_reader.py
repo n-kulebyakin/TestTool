@@ -9,7 +9,7 @@ from pathlib import Path
 
 HEADER_PATTERN = r'(?:[\w.-]|".*")+'
 BODY_PATTERN = r'[\w.\-\~\;>]+'
-ADAPT_PATH = os.environ.get('ADAPT_PATH', 'E:/')
+ADAPT_PATH = os.environ.get('ADAPT_PATH', 'X:/eqv/adapt')
 
 PRODUCT_TYPES = ('File', 'Directory',)
 

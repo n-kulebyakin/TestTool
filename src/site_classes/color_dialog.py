@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QTableWidgetItem
 from PyQt5.QtWidgets import QVBoxLayout
 
 # @formatter:off
+# Цвета объектов по умолчанию
 OBJECT_COLORS = {
     "SHSIGNAL": "#aa8c77",
     "SECTION": "#d3c9c2",
@@ -25,6 +26,7 @@ class ObjectColorWindow(QDialog):
     На выход принимает словарь цветов объектов по умолчанию
     и список логических объектов отображаемых на сцене.
     """
+
     # TODO: Добавить сброс настройки цветов
     #  при отмене или закрытие окна
     def __init__(self, colors, visual_objects):
