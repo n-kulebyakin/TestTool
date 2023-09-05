@@ -43,6 +43,7 @@ def get_lines(input_data, pattern=WORD_LOG_PATTERN):
     # информацию о переменных и не является
     # предварительными пересчётами
     # возвращаем её
+
     for line in input_data:
         match = re.findall(pattern, line)
         if match and match[0] == '!' and 'P' not in match:
@@ -56,6 +57,8 @@ def log_data_parser(input_data):
     out_data = {}
 
     for line in get_lines(input_data):
+        if not line:
+            continue
 
         # Если названия станции нет в хранилище,
         # то добавляем его
@@ -75,7 +78,6 @@ def log_data_parser(input_data):
 
             value = {'value_out': line[10], 'old_value_out': line[11]}
             out_data[line[1]][line[4]][channel_name] = value
-
         else:
             value = {'value': line[6], 'old_value': line[7]}
             out_data[line[1]][line[4]][line[5]] = value
